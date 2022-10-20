@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\Repositories\DataModels\" />
+    <Folder Include="Infrastructure\Services\" />
+  </ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Innovt.Core" Version="6.1.7" />
+		<PackageReference Include="Innovt.CrossCutting.IOC" Version="6.1.7" />
+		<PackageReference Include="Innovt.CrossCutting.Log.Serilog" Version="6.1.7" />
+		<PackageReference Include="Innovt.Cloud.AWS" Version="6.1.7" />
+		<PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.5.16" />
+		<PackageReference Include="Innovt.Cloud.AWS.Dynamo" Version="6.1.7" />
+	</ItemGroup>
+</Project>
