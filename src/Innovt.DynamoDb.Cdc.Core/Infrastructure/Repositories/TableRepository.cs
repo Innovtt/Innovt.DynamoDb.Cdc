@@ -25,28 +25,40 @@ public class TableRepository : Repository, ISyncTableRepository
     {
     }
 
-    public TableRepository(ILogger logger, IAwsConfiguration configuration, string region) : base(logger, configuration, region)
+    public TableRepository(ILogger logger, IAwsConfiguration configuration, string region) : base(logger, configuration,
+        region)
     {
     }
-    public async Task<(Dictionary<string, object>, List<DynamoRecordItem>)> GetRecordsPaginated(SyncTableRequest syncTableRequest, Dictionary<string, object> paginationKey, CancellationToken cancellationToken)
+
+    public async Task<(Dictionary<string, object>, List<DynamoRecordItem>)> GetRecordsPaginated(
+        SyncTableRequest syncTableRequest, Dictionary<string, object> paginationKey,
+        CancellationToken cancellationToken)
     {
         if (syncTableRequest == null) throw new ArgumentNullException(nameof(syncTableRequest));
 
         var client = new AmazonDynamoDBClient(Configuration.GetCredential());
 
-        var res = await client.ScanAsync(new Amazon.DynamoDBv2.Model.ScanRequest(syncTableRequest.TableName)
+        var scanRequest = new Amazon.DynamoDBv2.Model.ScanRequest(syncTableRequest.TableName)
         {
             Limit = syncTableRequest.PageSize,
             Select = Select.ALL_ATTRIBUTES,
-            ExclusiveStartKey = paginationKey?.ToDictionary(a => a.Key, b => ((AttributeValue)b.Value)),
             ConsistentRead = true,
-        }, cancellationToken);
+        };
+        if (syncTableRequest.IndexName.IsNotNullOrEmpty())
+            scanRequest.IndexName = syncTableRequest.IndexName;
+
+        if (paginationKey is { })
+            scanRequest.ExclusiveStartKey =
+                paginationKey.ToDictionary(a => a.Key, b => ((AttributeValue) b.Value));
+
+        var scanResult = await client.ScanAsync(scanRequest, cancellationToken);
 
         var documents = new List<DynamoRecordItem>();
 
-        var describe = await client.DescribeTableAsync(new DescribeTableRequest(syncTableRequest.TableName), CancellationToken.None);
+        var describe = await client.DescribeTableAsync(new DescribeTableRequest(syncTableRequest.TableName),
+            CancellationToken.None);
 
-        foreach (var item in res.Items)
+        foreach (var item in scanResult.Items)
         {
             var doc = new DynamoRecordItem(syncTableRequest.TableName);
 
@@ -61,10 +73,8 @@ public class TableRepository : Repository, ISyncTableRepository
                 {
                     keys.Add(key, AttributeHelper.FormatAttributeValue(item[key]));
                 }
-                else
-                {
-                    newImageItems.Add(key, AttributeHelper.FormatAttributeValue(item[key]));
-                }
+
+                newImageItems.Add(key, AttributeHelper.FormatAttributeValue(item[key]));
             }
 
             doc.dynamodb = new DynamoStreamRecord()
@@ -76,36 +86,52 @@ public class TableRepository : Repository, ISyncTableRepository
             documents.Add(doc);
         }
 
-        return (res.LastEvaluatedKey?.ToDictionary(a => a.Key, b => ((object)b.Value)), documents);
+        return (scanResult.LastEvaluatedKey?.ToDictionary(a => a.Key, b => ((object) b.Value)), documents);
     }
 
-    public async Task SavePaginationKey(string tableName, Dictionary<string, object> paginationKey, CancellationToken cancellation)
+    public async Task SavePaginationKey(string tableName, Dictionary<string, object> paginationKey,
+        CancellationToken cancellation)
     {
         if (tableName == null) throw new ArgumentNullException(nameof(tableName));
         if (paginationKey == null) throw new ArgumentNullException(nameof(paginationKey));
-        
+
         //you can improve this is the key is not string
         var model = new SyncTableProgressDataModel()
         {
             BoundedContext = "CDC",
             TableName = tableName,
-            PaginationKey = paginationKey.ToDictionary(a => a.Key, b => ((AttributeValue)b.Value).S)
+            PaginationKey = paginationKey.ToDictionary(a => a.Key, b => ((AttributeValue) b.Value).S)
         };
 
         await AddAsync(model, cancellation);
     }
 
-    public async Task<Dictionary<string, object>> GetPaginationKey(string tableName, CancellationToken cancellationToken)
+    public async Task<Dictionary<string, object>> GetPaginationKey(string tableName,
+        CancellationToken cancellationToken)
     {
         var queryRequest = new QueryRequest
         {
             KeyConditionExpression = "BoundedContext = :pk AND TableName=:sk",
-            Filter = new { pk = "CDC", sk = tableName }
+            Filter = new {pk = "CDC", sk = tableName}
         };
 
         var item = await QueryAsync<SyncTableProgressDataModel>(queryRequest, cancellationToken);
 
-        return item.IsNullOrEmpty() ? null :
-               item.Single().PaginationKey.ToDictionary(id => id.Key, id => (object)new AttributeValue(id.Value));
+        return item.SingleOrDefault()?.PaginationKey
+            ?.ToDictionary(id => id.Key, id => (object) new AttributeValue(id.Value));
+    }
+
+    public async Task EnableKinesisDataStream(string tableName, string streamArn, CancellationToken cancellationToken)
+    {
+        if (tableName == null) throw new ArgumentNullException(nameof(tableName));
+        if (streamArn == null) throw new ArgumentNullException(nameof(streamArn));
+
+        var client = new AmazonDynamoDBClient(Configuration.GetCredential());
+
+        await client.EnableKinesisStreamingDestinationAsync(new EnableKinesisStreamingDestinationRequest()
+        {
+            TableName = tableName,
+            StreamArn = streamArn
+        }, cancellationToken);
     }
 }

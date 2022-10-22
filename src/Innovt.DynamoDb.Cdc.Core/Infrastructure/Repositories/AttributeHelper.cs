@@ -19,28 +19,27 @@ public static class AttributeHelper
 
         if (value.IsBOOLSet)
         {
-            return new { BOOL = value.BOOL };
+            return new {BOOL = value.BOOL};
         }
 
         if (value.N is { })
         {
-            return new { N = value.N };
+            return new {N = value.N};
         }
 
         if (value.NS.IsNotNullOrEmpty())
         {
-            return new { NS = value.NS };
+            return new {NS = value.NS};
         }
 
         if (value.SS.IsNotNullOrEmpty())
         {
-            return new { SS = value.SS };
+            return new {SS = value.SS};
         }
 
         if (value.IsLSet)
         {
-            return new { L = value.L.Select(FormatAttributeValue) };
-
+            return new {L = value.L.Select(FormatAttributeValue)};
         }
 
         //////Nested Type
@@ -50,12 +49,12 @@ public static class AttributeHelper
 
             foreach (var item in value.M)
             {
-                ((IDictionary<string, object>)complexObj).Add(item.Key, FormatAttributeValue(item.Value));
+                ((IDictionary<string, object>) complexObj).Add(item.Key, FormatAttributeValue(item.Value));
             }
 
             return complexObj;
         }
 
-        return new { S = value.S };
+        return new {S = value.S};
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using Innovt.Core.CrossCutting.Ioc;
+using System.Threading;
 using Innovt.Core.Utilities;
 using Innovt.CrossCutting.IOC;
-using Innovt.DynamoDb.Cdc.Core.Application;
 using Innovt.DynamoDb.Cdc.Core.Domain;
 using Innovt.DynamoDb.Cdc.Core.Infrastructure.Ioc;
 
@@ -22,11 +20,11 @@ namespace Innovt.DynamoDb.Console
             if (syncRequests.IsNullOrEmpty())
                 throw new Exception($"The {SyncRequestFileName} is empty or null.");
 
-            return  System.Text.Json.JsonSerializer.Deserialize<List<SyncTableRequest>>( syncRequests );
+            return System.Text.Json.JsonSerializer.Deserialize<List<SyncTableRequest>>(syncRequests);
         }
 
 
-        private static void SetupIoc()
+        private static Container SetupIoc()
         {
             var container = new Container();
 
@@ -34,11 +32,10 @@ namespace Innovt.DynamoDb.Console
 
             container.CheckConfiguration();
 
-            IOCLocator.Initialize(container);
+            return container;
         }
-        
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             if (!File.Exists(SyncRequestFileName))
             {
@@ -48,25 +45,21 @@ namespace Innovt.DynamoDb.Console
             }
 
             System.Console.BackgroundColor = ConsoleColor.White;
+            var cancellationTokenSource = new CancellationTokenSource(); //Todo: cancel if press some key
+
             try
             {
                 var syncRequests = ReadSyncRequests();
 
-                SetupIoc();
-
-                var syncTableAppService = IOCLocator.Resolve<ISyncTableAppService>();
-                
-                await syncTableAppService.Handle(syncRequests);
-
+                new Worker(SetupIoc()).Run(syncRequests, cancellationTokenSource.Token);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 System.Console.BackgroundColor = System.Console.ForegroundColor;
-                System.Console.WriteLine($"File {SyncRequestFileName} not found");
+                System.Console.WriteLine(ex.Message);
             }
 
             System.Console.WriteLine($"The Program has ended.");
-
         }
     }
 }

@@ -9,23 +9,25 @@ using Innovt.Core.CrossCutting.Log;
 using Innovt.CrossCutting.Log.Serilog;
 using Innovt.DynamoDb.Cdc.Core.Application;
 using Innovt.DynamoDb.Cdc.Core.Domain;
+using Innovt.DynamoDb.Cdc.Core.Infrastructure.Repositories;
+using Innovt.DynamoDb.Cdc.Core.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Innovt.DynamoDb.Cdc.Core.Infrastructure.Ioc
 {
-    public  class DefaultIocModule: IOCModule
+    public class DefaultIocModule : IOCModule
     {
         public DefaultIocModule()
         {
             var services = GetServices();
-            
-            services.AddScoped<ISyncTableAppService, SyncTableAppService>();
-            services.AddScoped<ILogger, Logger>();
-            //services.AddScoped<ITableRepository, Logger>();
-            //services.AddScoped<IDestinationService, Logger>();
-            
+
+            services.AddTransient<ISyncTableAppService, SyncTableAppService>();
+            services.AddTransient<ILogger, Logger>();
+            services.AddTransient<ISyncTableRepository, TableRepository>();
+            services.AddTransient<IDestinationService, KinesisService>();
+
             //Add your profile or credentials here.
-            services.AddScoped<IAwsConfiguration>(a=>new DefaultAWSConfiguration("antecipa-prod"));
+            services.AddSingleton<IAwsConfiguration>(a => new DefaultAWSConfiguration("antecipa-prod"));
         }
     }
 }

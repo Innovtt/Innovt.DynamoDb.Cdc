@@ -10,9 +10,13 @@ namespace Innovt.DynamoDb.Cdc.Core.Domain;
 
 public interface ISyncTableRepository
 {
-    Task<(Dictionary<string, object>, List<DynamoRecordItem>)> GetRecordsPaginated(SyncTableRequest syncTableRequest, Dictionary<string, object> paginationKey, CancellationToken cancellationToken);
+    Task<(Dictionary<string, object>, List<DynamoRecordItem>)> GetRecordsPaginated(SyncTableRequest syncTableRequest,
+        Dictionary<string, object> paginationKey, CancellationToken cancellationToken);
 
-    Task SavePaginationKey(string tableName, Dictionary<string, object> paginationKey, CancellationToken cancellationToken);
+    Task SavePaginationKey(string tableName, Dictionary<string, object> paginationKey,
+        CancellationToken cancellationToken);
 
     Task<Dictionary<string, object>> GetPaginationKey(string tableName, CancellationToken cancellationToken);
+
+    Task EnableKinesisDataStream(string tableName, string streamArn, CancellationToken cancellationToken);
 }

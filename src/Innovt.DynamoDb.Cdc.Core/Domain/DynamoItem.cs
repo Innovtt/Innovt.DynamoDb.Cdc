@@ -13,7 +13,7 @@ public class DynamoRecordItem
     public string eventName => "INSERT";
     public string userIdentity => null;
     public string recordFormat => "application/json";
-    public string eventSource => "dynamobulkinsert";//"aws:dynamodb";
+    public string eventSource => "dynamobulkinsert"; //"aws:dynamodb";
     public string tableName { get; set; }
     public DynamoStreamRecord dynamodb { get; set; }
 
@@ -22,6 +22,7 @@ public class DynamoRecordItem
         this.tableName = tableName;
     }
 }
+
 public class DynamoStreamRecord
 {
     public long ApproximateCreationDateTime => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

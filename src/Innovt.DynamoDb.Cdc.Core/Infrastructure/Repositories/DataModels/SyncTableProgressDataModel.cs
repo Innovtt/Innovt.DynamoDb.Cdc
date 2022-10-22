@@ -9,17 +9,13 @@ using System.Collections.Generic;
 namespace Innovt.DynamoDb.Cdc.Core.Infrastructure.Repositories.DataModels;
 
 [DynamoDBTable("LegacyMigrator")]
-public class SyncTableProgressDataModel: ITableMessage
+public class SyncTableProgressDataModel : ITableMessage
 {
-    [DynamoDBIgnore]
-    public string Id { get; set; }
+    [DynamoDBIgnore] public string Id { get; set; }
 
-    [DynamoDBHashKey]
-    public string BoundedContext { get; set; }
+    [DynamoDBHashKey] public string BoundedContext { get; set; }
 
-    [DynamoDBRangeKey] 
-    public string TableName { get; set; }
+    [DynamoDBRangeKey] public string TableName { get; set; }
 
     public Dictionary<string, string> PaginationKey { get; set; }
-
 }

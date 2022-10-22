@@ -1,17 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Innovt.Core" Version="6.1.7" />
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Innovt.DynamoDb.Cdc.Core\Innovt.DynamoDb.Cdc.Core.csproj" />
-	</ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Innovt.Core" Version="6.1.7"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Innovt.DynamoDb.Cdc.Core\Innovt.DynamoDb.Cdc.Core.csproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Innovt.CrossCutting.IOC" Version="6.1.7" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Innovt.CrossCutting.IOC" Version="6.1.7"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="SyncRequest.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
