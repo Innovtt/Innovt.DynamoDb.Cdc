@@ -127,11 +127,15 @@ public class TableRepository : Repository, ISyncTableRepository
         if (streamArn == null) throw new ArgumentNullException(nameof(streamArn));
 
         var client = new AmazonDynamoDBClient(Configuration.GetCredential());
+        
+        
+        var result = await client.EnableKinesisStreamingDestinationAsync(
+            new EnableKinesisStreamingDestinationRequest()
+            {
+                TableName = tableName,
+                StreamArn = streamArn
+            }, cancellationToken);
 
-        await client.EnableKinesisStreamingDestinationAsync(new EnableKinesisStreamingDestinationRequest()
-        {
-            TableName = tableName,
-            StreamArn = streamArn
-        }, cancellationToken);
     }
+
 }

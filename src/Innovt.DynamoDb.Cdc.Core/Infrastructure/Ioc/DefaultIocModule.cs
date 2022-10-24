@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Innovt.Cloud.AWS.Configuration;
+﻿using Innovt.Cloud.AWS.Configuration;
 using Innovt.Core.CrossCutting.Ioc;
 using Innovt.Core.CrossCutting.Log;
 using Innovt.CrossCutting.Log.Serilog;
@@ -22,10 +17,9 @@ namespace Innovt.DynamoDb.Cdc.Core.Infrastructure.Ioc
             var services = GetServices();
 
             services.AddTransient<ISyncTableAppService, SyncTableAppService>();
-            services.AddTransient<ILogger, Logger>();
+            services.AddSingleton<ILogger, Logger>();
             services.AddTransient<ISyncTableRepository, TableRepository>();
             services.AddTransient<IDestinationService, KinesisService>();
-
             //Add your profile or credentials here.
             services.AddSingleton<IAwsConfiguration>(a => new DefaultAWSConfiguration("antecipa-prod"));
         }

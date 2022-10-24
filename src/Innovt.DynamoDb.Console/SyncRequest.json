@@ -4,7 +4,7 @@
     "IndexName": "",
     "PageSize": 100,
     "PageCount": 10,
-    "EnableKinesisStream": true,
+    "EnableKinesisStream": false,
     "KinesisStreamArn": "arn:aws:kinesis:us-east-1:861734233337:stream/CdcStream"
   },
   {
@@ -12,7 +12,7 @@
     "IndexName": "",
     "PageSize": 100,
     "PageCount": 10,
-    "EnableKinesisStream": true,
+    "EnableKinesisStream": false,
     "KinesisStreamArn": "arn:aws:kinesis:us-east-1:861734233337:stream/CdcStream"
   },
   {
@@ -20,7 +20,7 @@
     "IndexName": "",
     "PageSize": 100,
     "PageCount": 10,
-    "EnableKinesisStream": true,
+    "EnableKinesisStream": false,
     "KinesisStreamArn": "arn:aws:kinesis:us-east-1:861734233337:stream/CdcStream"
   },
   {
@@ -28,7 +28,7 @@
     "IndexName": "",
     "PageSize": 100,
     "PageCount": 10,
-    "EnableKinesisStream": true,
+    "EnableKinesisStream": false,
     "KinesisStreamArn": "arn:aws:kinesis:us-east-1:861734233337:stream/CdcStream"
   },
   {
@@ -36,7 +36,7 @@
     "IndexName": "",
     "PageSize": 100,
     "PageCount": 10,
-    "EnableKinesisStream": true,
+    "EnableKinesisStream": false,
     "KinesisStreamArn": "arn:aws:kinesis:us-east-1:861734233337:stream/CdcStream"
   }
 ]

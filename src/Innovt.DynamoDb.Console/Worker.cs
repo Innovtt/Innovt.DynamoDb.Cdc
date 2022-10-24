@@ -20,15 +20,15 @@ public class Worker
     {
         this.container = container ?? throw new ArgumentNullException(nameof(container));
         this.logger = container.Resolve<ILogger>();
-        this.semaphore = new Semaphore(2, 5); // you can change here.
+        this.semaphore = new Semaphore(5, 10); // you can change here.
     }
 
 
-    private void ProcessSync(object syncTableRequest)
+    private void ProcessSync(object workItemRequest)
     {
-        if (syncTableRequest == null) throw new ArgumentNullException(nameof(syncTableRequest));
+        if (workItemRequest == null) throw new ArgumentNullException(nameof(workItemRequest));
 
-        var workItem = (WorkItem) syncTableRequest;
+        var workItem = (WorkItem)workItemRequest;
 
         try
         {
@@ -39,12 +39,16 @@ public class Worker
             if (syncTableService is null)
                 throw new CriticalException("Impossible to instantiate the ISyncTableAppService.");
 
-            (syncTableService.Sync(workItem.SyncTableRequest, workItem.CancellationToken)).Wait();
-            
-            logger.Info($"Rodou a task ja.");
+            (syncTableService.Sync(workItem.SyncTableRequest, workItem.CancellationToken)).Wait(
+                workItem.CancellationToken);
+
+        }
+        catch(Exception ex) 
+        {
+            logger.Error(ex, $"Thread failure  for table.{workItem.SyncTableRequest.TableName}");
         }
         finally
-        { 
+        {
             semaphore.Release();
             logger.Info($"Releasing Semaphore. Table {workItem.SyncTableRequest.TableName}");
         }
@@ -59,8 +63,7 @@ public class Worker
             try
             {
                 semaphore.WaitOne(Timeout.Infinite, true);
-                ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessSync),
-                    new WorkItem(syncTableRequest, cancellationToken));
+                ThreadPool.QueueUserWorkItem(ProcessSync,new WorkItem(syncTableRequest, cancellationToken));
             }
             catch (Exception ex)
             {

@@ -52,7 +52,7 @@ public static class AttributeHelper
                 ((IDictionary<string, object>) complexObj).Add(item.Key, FormatAttributeValue(item.Value));
             }
 
-            return complexObj;
+            return new { M = complexObj };
         }
 
         return new {S = value.S};

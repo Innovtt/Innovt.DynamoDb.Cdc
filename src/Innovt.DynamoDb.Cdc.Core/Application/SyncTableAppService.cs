@@ -49,7 +49,7 @@ public class SyncTableAppService : ISyncTableAppService
         if (cancellationToken.IsCancellationRequested) return;
 
         logger.Info($"Starting sync for table {syncRequest.TableName}");
-
+        
         var paginationKey = await tableRepository.GetPaginationKey(syncRequest.TableName, cancellationToken);
         //in memory control in case of failure.
         var published = false;
